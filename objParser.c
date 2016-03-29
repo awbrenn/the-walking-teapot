@@ -7,12 +7,28 @@
 
 const size_t LINE_SIZE = 512;
 int faceCount    = 0;
-vec3* vertexArray = NULL, normalArray = NULL, vec3* tangentArray = NULL, vec3* bitangentArray = NULL;
+vec3* vertexArray = NULL, *normalArray = NULL, *tangentArray = NULL, *bitangentArray = NULL;
 vec2* textureArray = NULL;
 face* faceArray = NULL;
 
-bool prefix(const char* pre, const char* str) {
+int prefix(const char* pre, const char* str) {
    return strncmp(pre, str, strlen(pre)) == 0;
+}
+
+void parseVec2(char* line, vec2* dest, int index) {
+   sscanf(line, "%*s %f %f", &dest[index].x, &dest[index].y);
+}
+
+void parseVec3(char* line, vec3* dest, int index) {
+   sscanf(line, "%*s %f %f %f", &dest[index].x, &dest[index].y, &dest[index].z);
+}
+
+void parseFace(char* line, face* dest, int index) {
+   sscanf(line, "%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",
+      &dest[index].a[0], &dest[index].a[1], &dest[index].a[2],
+      &dest[index].b[0], &dest[index].b[1], &dest[index].b[2],
+      &dest[index].c[0], &dest[index].c[1], &dest[index].c[2],
+      &dest[index].d[0], &dest[index].d[1], &dest[index].d[2]);
 }
 
 void objLoad(char* filePath) {
@@ -22,17 +38,17 @@ void objLoad(char* filePath) {
 
    int vertexCount = 0, textureCount = 0, normalCount = 0;
    while(fgets(line, LINE_SIZE, file) != NULL) {
-      if(prefix("vt", line) ++textureCount;
-      else if(prefix("vn", line) ++normalCount;
-      else if(prefix("v", line)  ++vertexCount;
-      else if(prefix("f", line)  ++faceCount;
+      if(prefix("vt", line)) ++textureCount;
+      else if(prefix("vn", line)) ++normalCount;
+      else if(prefix("v", line))  ++vertexCount;
+      else if(prefix("f", line))  ++faceCount;
    }
    rewind(file);
 
    vertexArray = (vec3*)calloc(vertexCount,sizeof(vec3));
    normalArray = (vec3*)calloc(normalCount, sizeof(vec3));
-   tangentArray = (vec3*)calloc(tangentCount, sizeof(vec3));
-   bitangentArray = (vec3*)calloc(bitangentCount, sizeof(vec3));
+   tangentArray = (vec3*)calloc(vertexCount, sizeof(vec3));
+   bitangentArray = (vec3*)calloc(vertexCount, sizeof(vec3));
    textureArray = (vec2*)calloc(textureCount, sizeof(vec2));
    faceArray = (face*)calloc(faceCount, sizeof(face));
 
@@ -40,7 +56,7 @@ void objLoad(char* filePath) {
        bitangentTally = 0, textureTally = 0, faceTally = 0;
 
    while(fgets(line, LINE_SIZE, file) != NULL) {
-      if(prefix("vt", line)) parseVec2(line, tangentArray, tangentTally++);
+      if(prefix("vt", line)) parseVec2(line, textureArray, tangentTally++);
       else if(prefix("vn", line)) parseVec3(line, normalArray, normalTally++);
       else if(prefix("vx", line)) parseVec3(line, tangentArray, tangentTally++);
       else if(prefix("vy", line)) parseVec3(line, bitangentArray, bitangentTally++);
@@ -50,22 +66,6 @@ void objLoad(char* filePath) {
 
    free(line);
    fclose(file);
-}
-
-parseVec2(char* line, vec2* dest, int index) {
-   sscanf(line, "%*s %f %f", &dest[index].x, &dest[index].y);
-}
-
-parseVec3(char* line, vec3* dest, int index) {
-   sscanf(line, "%*s %f %f %f", &dest[index].x, &dest[index].y, &dest[index].z);
-}
-
-parseFace(char* line, face* dest, int index) {
-   sscanf(line, "%*s %d/%d/%d %d/%d/%d %d/%d/%d",
-      &dest[index].a.x, &dest[index].a.y, &dest[index].a.z,
-      &dest[index].b.x, &dest[index].b.y, &dest[index].b.z,
-      &dest[index].c.x, &dest[index].c.y, &dest[index].c.z,
-      &dest[index].d.x, &dest[index].d.y, &dest[index].d.z);
 }
 
 void objUnload() {

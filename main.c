@@ -69,43 +69,28 @@ void drawStuff() {
 }
 
 void initOpenGL(int argc, char** argv) {
-   srandom(123456789);
    glutInit(&argc, argv);
    glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE | GLUT_ACCUM);
-   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-   glutInitWindowPosition(100, 50);
-   glutCreateWindow("The Welsh Dragons");
+   glutInitWindowSize(1280, 720);
+   glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH) - 1280)/2, (glutGet(GLUT_SCREEN_HEIGHT) - 720)/2);
+   glutCreateWindow("The Walking Teapot");
 
    glClearColor(0.0, 0.0, 0.0, 0.0);
    glEnable(GL_DEPTH_TEST);
    glEnable(GL_MULTISAMPLE_ARB);
 
    doViewVolume();
-   doLights();
    setShaders();
 }
 
 void go() {
-   if(lookAround) {
-      drawStuff();
-      return;
-   }
-
-   float xt;
-   glClear(GL_ACCUM_BUFFER_BIT);
-   for(xt = (float)-EYEDX; xt < EYEDX; xt += EYEDX / 10.0){
-      vv(xt);
-      drawStuff();
-      glAccum(GL_ACCUM,0.05);
-   }
-   glAccum(GL_RETURN,1.0);
-   glFlush();
+   drawStuff();
 }
 
 void getOut(unsigned char key, int x, int y) {
    switch(key) {
       case 'q':
-         plyUnload();
+         objUnload();
          exit(1);
       default:
          break;
