@@ -1,3 +1,6 @@
+#ifndef UTILITIES
+#define UTILITIES
+
 typedef struct vec2 {
    GLfloat x, y;
 } vec2;
@@ -11,3 +14,5 @@ typedef struct face {
 } face;
 
 void dieWithError(char* message);
+
+#endif
