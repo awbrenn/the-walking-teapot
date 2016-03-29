@@ -10,7 +10,7 @@ typedef struct vec3 {
 } vec3;
 
 typedef struct face {
-   int  a[3], b[3], c[3], d[3];
+   int index[4][3];
 } face;
 
 void dieWithError(char* message);

@@ -25,10 +25,10 @@ void parseVec3(char* line, vec3* dest, int index) {
 
 void parseFace(char* line, face* dest, int index) {
    sscanf(line, "%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",
-      &dest[index].a[0], &dest[index].a[1], &dest[index].a[2],
-      &dest[index].b[0], &dest[index].b[1], &dest[index].b[2],
-      &dest[index].c[0], &dest[index].c[1], &dest[index].c[2],
-      &dest[index].d[0], &dest[index].d[1], &dest[index].d[2]);
+      &dest[index].index[0][0], &dest[index].index[0][1], &dest[index].index[0][2],
+      &dest[index].index[1][0], &dest[index].index[1][1], &dest[index].index[1][2],
+      &dest[index].index[2][0], &dest[index].index[2][1], &dest[index].index[2][2],
+      &dest[index].index[3][0], &dest[index].index[3][1], &dest[index].index[3][2]);
 }
 
 void objLoad(char* filePath) {
