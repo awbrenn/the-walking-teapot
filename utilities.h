@@ -1,17 +1,10 @@
 #ifndef UTILITIES
 #define UTILITIES
+#include <GL/gl.h>
 
-typedef struct vec2 {
-   GLfloat x, y;
-} vec2;
-
-typedef struct vec3 {
-   GLfloat x, y, z;
-} vec3;
-
-typedef struct face {
-   int index[4][3];
-} face;
+typedef GLfloat vec2[2];
+typedef GLfloat vec3[3];
+typedef int face[4][3];
 
 void dieWithError(char* message);
 

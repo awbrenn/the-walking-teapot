@@ -6,7 +6,7 @@
 #include "utilities.h"
 
 const size_t LINE_SIZE = 512;
-int faceCount    = 0;
+int faceCount = 0;
 vec3* vertexArray = NULL, *normalArray = NULL, *tangentArray = NULL, *bitangentArray = NULL;
 vec2* textureArray = NULL;
 face* faceArray = NULL;
@@ -16,19 +16,19 @@ int prefix(const char* pre, const char* str) {
 }
 
 void parseVec2(char* line, vec2* dest, int index) {
-   sscanf(line, "%*s %f %f", &dest[index].x, &dest[index].y);
+   sscanf(line, "%*s %f %f", &dest[index][0], &dest[index][1]);
 }
 
 void parseVec3(char* line, vec3* dest, int index) {
-   sscanf(line, "%*s %f %f %f", &dest[index].x, &dest[index].y, &dest[index].z);
+   sscanf(line, "%*s %f %f %f", &dest[index][0], &dest[index][1], &dest[index][2]);
 }
 
 void parseFace(char* line, face* dest, int index) {
    sscanf(line, "%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",
-      &dest[index].index[0][0], &dest[index].index[0][1], &dest[index].index[0][2],
-      &dest[index].index[1][0], &dest[index].index[1][1], &dest[index].index[1][2],
-      &dest[index].index[2][0], &dest[index].index[2][1], &dest[index].index[2][2],
-      &dest[index].index[3][0], &dest[index].index[3][1], &dest[index].index[3][2]);
+      &dest[index][0][0], &dest[index][0][1], &dest[index][0][2],
+      &dest[index][1][0], &dest[index][1][1], &dest[index][1][2],
+      &dest[index][2][0], &dest[index][2][1], &dest[index][2][2],
+      &dest[index][3][0], &dest[index][3][1], &dest[index][3][2]);
 }
 
 void objLoad(char* filePath) {
@@ -77,3 +77,11 @@ void objUnload() {
    free(faceArray); faceArray = NULL;
    faceCount = 0;
 }
+
+int getFaceCount() { return faceCount; }
+face* getFaces() { return faceArray; }
+GLfloat* getTexture(int index) { return &textureArray[index - 1][0]; }
+GLfloat* getVertex(int index) { return &vertexArray[index - 1][0]; }
+GLfloat* getNormal(int index) { return &normalArray[index - 1][0]; }
+GLfloat* getTangent(int index) { return &tangentArray[index - 1][0]; }
+GLfloat* getBitangent(int index) { return &bitangentArray[index - 1][0]; }
