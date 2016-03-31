@@ -69,8 +69,8 @@ void doViewVolume() {
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   vec3 eye = { 2.5, 1.8, 2.0 };
-   vec3 view = { 0.0, 0.0, 0.0 };
+   vec3 eye = { 3.0, 3.0, 3.0 };
+   vec3 view = { 0.0, 0.5, 0.0 };
    vec3 up = { 0.0, 1.0, 0.0 };
 
    gluLookAt(eye[0], eye[1], eye[2], view[0], view[1], view[2], up[0], up[1], up[2]);
