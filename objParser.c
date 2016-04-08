@@ -6,10 +6,7 @@
 #include "utilities.h"
 
 const size_t LINE_SIZE = 512;
-int faceCount = 0;
-vec3* vertexArray = NULL, *normalArray = NULL, *tangentArray = NULL, *bitangentArray = NULL;
-vec2* textureArray = NULL;
-face* faceArray = NULL;
+obj* objects[256] = { NULL };
 
 int prefix(const char* pre, const char* str) {
    return strncmp(pre, str, strlen(pre)) == 0;
@@ -31,12 +28,18 @@ void parseFace(char* line, face* dest, int index) {
       &dest[index][3][0], &dest[index][3][1], &dest[index][3][2]);
 }
 
-void objLoad(char* filePath) {
+int nextIndex() {
+   int index = 0;
+   while(objects[index++]);
+   return --index;
+}
+
+int objLoad(char* filePath) {
    FILE* file = fopen(filePath, "r");
    char* line = (char*)calloc(LINE_SIZE, sizeof(char));
    char* token = NULL, * delim = " \n\t";
 
-   int vertexCount = 0, textureCount = 0, normalCount = 0;
+   int vertexCount = 0, textureCount = 0, normalCount = 0, faceCount = 0;
    while(fgets(line, LINE_SIZE, file) != NULL) {
       if(prefix("vt", line)) ++textureCount;
       else if(prefix("vn", line)) ++normalCount;
@@ -45,43 +48,46 @@ void objLoad(char* filePath) {
    }
    rewind(file);
 
-   vertexArray = (vec3*)calloc(vertexCount,sizeof(vec3));
-   normalArray = (vec3*)calloc(normalCount, sizeof(vec3));
-   tangentArray = (vec3*)calloc(vertexCount, sizeof(vec3));
-   bitangentArray = (vec3*)calloc(vertexCount, sizeof(vec3));
-   textureArray = (vec2*)calloc(textureCount, sizeof(vec2));
-   faceArray = (face*)calloc(faceCount, sizeof(face));
+   obj* object = (obj*)calloc(1, sizeof(obj));
+   object->faceCount = faceCount;
+   object->vertices = (vec3*)calloc(vertexCount,sizeof(vec3));
+   object->normals = (vec3*)calloc(normalCount, sizeof(vec3));
+   object->tangents = (vec3*)calloc(vertexCount, sizeof(vec3));
+   object->bitangents = (vec3*)calloc(vertexCount, sizeof(vec3));
+   object->textures = (vec2*)calloc(textureCount, sizeof(vec2));
+   object->faces = (face*)calloc(faceCount, sizeof(face));
 
    int vertexTally = 0, normalTally = 0, tangentTally = 0,
        bitangentTally = 0, textureTally = 0, faceTally = 0;
 
    while(fgets(line, LINE_SIZE, file) != NULL) {
-      if(prefix("vt", line)) parseVec2(line, textureArray, tangentTally++);
-      else if(prefix("vn", line)) parseVec3(line, normalArray, normalTally++);
-      else if(prefix("vx", line)) parseVec3(line, tangentArray, tangentTally++);
-      else if(prefix("vy", line)) parseVec3(line, bitangentArray, bitangentTally++);
-      else if(prefix("v", line)) parseVec3(line, vertexArray, vertexTally++);
-      else if(prefix("f", line)) parseFace(line, faceArray, faceTally++);
+      if(prefix("vt", line)) parseVec2(line, object->textures, tangentTally++);
+      else if(prefix("vn", line)) parseVec3(line, object->normals, normalTally++);
+      else if(prefix("vx", line)) parseVec3(line, object->tangents, tangentTally++);
+      else if(prefix("vy", line)) parseVec3(line, object->bitangents, bitangentTally++);
+      else if(prefix("v", line)) parseVec3(line, object->vertices, vertexTally++);
+      else if(prefix("f", line)) parseFace(line, object->faces, faceTally++);
    }
 
    free(line);
    fclose(file);
+
+   int index = nextIndex();
+   objects[index] = object;
+   return index;
 }
 
 void objUnload() {
-   free(vertexArray); vertexArray = NULL;
-   free(normalArray); normalArray = NULL;
-   free(tangentArray); tangentArray = NULL;
-   free(bitangentArray); bitangentArray = NULL;
-   free(textureArray); textureArray = NULL;
-   free(faceArray); faceArray = NULL;
-   faceCount = 0;
+   for(int i = 0; i < 256; ++i) {
+      if(!objects[i]) continue;
+      free(objects[i]->vertices);
+      free(objects[i]->normals);
+      free(objects[i]->textures);
+      free(objects[i]->bitangents);
+      free(objects[i]->tangents);
+      free(objects[i]->faces);
+      free(objects[i]);
+   }
 }
 
-int getFaceCount() { return faceCount; }
-face* getFaces() { return faceArray; }
-GLfloat* getTexture(int index) { return &textureArray[index - 1][0]; }
-GLfloat* getVertex(int index) { return &vertexArray[index - 1][0]; }
-GLfloat* getNormal(int index) { return &normalArray[index - 1][0]; }
-GLfloat* getTangent(int index) { return &tangentArray[index - 1][0]; }
-GLfloat* getBitangent(int index) { return &bitangentArray[index - 1][0]; }
+obj* getObject(int index) { return objects[index]; }
