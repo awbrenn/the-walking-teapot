@@ -154,7 +154,8 @@ int objLoad(char* filePath) {
 }
 
 void objUnload() {
-   for(int i = 0; i < 256; ++i) {
+    int i;
+    for(i = 0; i < 256; ++i) {
       if(!objects[i]) continue;
       free(objects[i]->vertices);
       free(objects[i]->normals);
