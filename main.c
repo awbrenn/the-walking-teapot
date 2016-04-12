@@ -94,10 +94,15 @@ unsigned int setShaders(char* vert, char* frag) {
    glAttachShader(p,v);
    glLinkProgram(p);
 
-   char log[256];
+   char log[512];
    int length;
-   glGetShaderInfoLog(f, 256, &length, log);
-   fprintf(stderr, "%s\n", log);
+   glGetProgramInfoLog(p, 512, &length, log);
+   fprintf(stderr, "%d a", length);
+   fprintf(stderr, "%s a", log);
+
+   int status;
+   glGetProgramiv(p, GL_VALIDATE_STATUS, &status);
+   fprintf(stderr, "\n%d\n", status);
 
    return(p);
 }
@@ -121,16 +126,14 @@ void doViewVolume() {
 
 void drawStuff() {
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   glActiveTexture(GL_TEXTURE1);
+   glActiveTexture(GL_TEXTURE0);
    
    glEnable(GL_TEXTURE_2D);
-   glBegin(GL_QUADS);
-   
    int n, i, j;
    for(n = 0; n < renderCount; ++n) {
       obj* object = getObject(n);
       glUseProgram(shaders[n]);
-      
+      glBegin(GL_QUADS);   
       unsigned int index_tangent = glGetAttribLocation(shaders[n], "tangent");
       unsigned int index_bitangent = glGetAttribLocation(shaders[n], "bitangent");
 
@@ -143,13 +146,15 @@ void drawStuff() {
             glTexCoord2fv(object->textures[ti - 1]);
             glNormal3fv(object->normals[ni - 1]);
 
+            fprintf(stderr,"%f\n", object->tangents[ni-1][0]);
+
 //            glVertexAttrib3fv(index_tangent, object->tangents[vi - 1]);
 //            glVertexAttrib3fv(index_bitangent, object->bitangents[vi - 1]);
             glVertex3fv(object->vertices[vi - 1]);
          }
       }
+      glEnd();
    }
-   glEnd();
    glDisable(GL_TEXTURE_2D);
 
    glFlush();
