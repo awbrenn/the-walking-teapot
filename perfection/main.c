@@ -42,7 +42,7 @@ void doViewVolume() {
    glLoadIdentity();
 
    vec3 eye = { 4, 0.952, -1.471 };
-   vec3 view = { -20.044, -0.762, -0.141 };
+   vec3 view = { -25.044, -0.762, -0.141 };
    vec3 up = { 0.0, 1.0, 0.0 };
 
    gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
