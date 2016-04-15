@@ -36,13 +36,13 @@ void copyCat(char* dest, char* str1, char* str2) {
 void doViewVolume() {
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   gluPerspective(48.46, 16.0/9.0, 0.1, 25.0);
+   gluPerspective(30.46, 16.0/9.0, 0.1, 25.0);
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   vec3 eye = { 4, 0.952, -1.471 };
-   vec3 view = { -25.044, -0.762, -0.141 };
+   vec3 eye = { 9.3, 0.95, -1.1 };
+   vec3 view = { 1.0, 0.95, -1.1 };
    vec3 up = { 0.0, 1.0, 0.0 };
 
    gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
