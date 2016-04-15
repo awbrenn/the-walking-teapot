@@ -41,8 +41,8 @@ void doViewVolume() {
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   vec3 eye = { 12, 0.952, -1.471 };
-   vec3 view = { -0.044, -0.762, -0.141 };
+   vec3 eye = { 4, 0.952, -1.471 };
+   vec3 view = { -20.044, -0.762, -0.141 };
    vec3 up = { 0.0, 1.0, 0.0 };
 
    gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
@@ -194,7 +194,7 @@ void initOpenGL(int argc, char** argv) {
    loadResources("ground");
    loadResources("background");
 
-   glClearColor(0.0, 0.0, 0.0, 0.0);
+   glClearColor(0.0, 0.5, 0.0, 0.0);
    glEnable(GL_DEPTH_TEST);
    glEnable(GL_MULTISAMPLE_ARB);
    glEnable(GL_TEXTURE_2D);
@@ -236,10 +236,11 @@ void drawStuff() {
       
       unsigned int indexTangent = glGetAttribLocation(shaders[n], (const char*)"myTangent");
       unsigned int indexBitangent = glGetAttribLocation(shaders[n], (const char*)"myBitangent");
+      printf("%u %u\n", indexTangent, indexBitangent);
 
-      glBegin(GL_QUADS);
+      glBegin(GL_TRIANGLES);
       for(i = 0; i < object->faceCount; ++i) {
-         for(j = 0; j < 4; ++j) {
+         for(j = 0; j < 3; ++j) {
             int vi = object->faces[i][j][0];
             int ti = object->faces[i][j][1];
             int ni = object->faces[i][j][2];
