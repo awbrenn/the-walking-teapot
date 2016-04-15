@@ -41,11 +41,37 @@ void doViewVolume() {
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   vec3 eye = { 11.383, 0.952, -1.471 };
+   vec3 eye = { 12, 0.952, -1.471 };
    vec3 view = { -0.044, -0.762, -0.141 };
    vec3 up = { 0.0, 1.0, 0.0 };
 
    gluLookAt(eye.x, eye.y, eye.z, view.x, view.y, view.z, up.x, up.y, up.z);
+}
+
+void doLights() {
+float light0_ambient[] = { 0.0, 0.0, 0.0, 0.0 };
+float light0_diffuse[] = { 2.0, 2.0, 2.0, 0.0 }; 
+float light0_specular[] = { 2.25, 2.25, 2.25, 0.0 }; 
+float light0_position[] = { 1.5, 2.0, 2.0, 1.0 };
+float light0_direction[] = { -1.5, -2.0, -2.0, 1.0};
+
+// set scene default ambient 
+glLightModelfv(GL_LIGHT_MODEL_AMBIENT,light0_ambient); 
+
+// make specular correct for spots 
+glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,1); 
+glLightfv(GL_LIGHT0,GL_AMBIENT,light0_ambient); 
+glLightfv(GL_LIGHT0,GL_DIFFUSE,light0_diffuse); 
+glLightfv(GL_LIGHT0,GL_SPECULAR,light0_specular); 
+glLightf(GL_LIGHT0,GL_SPOT_EXPONENT,1.0); 
+glLightf(GL_LIGHT0,GL_SPOT_CUTOFF,180.0); 
+glLightf(GL_LIGHT0,GL_CONSTANT_ATTENUATION,1.0); 
+glLightf(GL_LIGHT0,GL_LINEAR_ATTENUATION,0.2); 
+glLightf(GL_LIGHT0,GL_QUADRATIC_ATTENUATION,0.01); 
+glLightfv(GL_LIGHT0,GL_POSITION,light0_position);
+glLightfv(GL_LIGHT0,GL_SPOT_DIRECTION,light0_direction);
+glEnable(GL_LIGHTING);
+glEnable(GL_LIGHT0);
 }
 
 void loadTexture(char *folder, int type) {
@@ -138,18 +164,7 @@ void setShaders(char* folder) {
    p = glCreateProgram();
    glAttachShader(p,f);
    glAttachShader(p,v);
-
    glLinkProgram(p);
-
-   char log[512];
-   int length;
-   glGetProgramInfoLog(p, 512, &length, log);
-   fprintf(stderr, "%d a", length);
-   fprintf(stderr, "%s a", log);
-
-   int status;
-   glGetProgramiv(p, GL_VALIDATE_STATUS, &status);
-   fprintf(stderr, "\n%d\n", status);
 
    shaders[renderCount] = p;
 }
@@ -185,11 +200,11 @@ void initOpenGL(int argc, char** argv) {
    glEnable(GL_TEXTURE_2D);
 
    doViewVolume();
+   doLights();
 }
 
 void setUniformParameter(unsigned int p, char* varName, unsigned int value) {
    int location = glGetUniformLocation(p, varName);
-   printf("\n\n%d\n\n", location);
    glUniform1i(location, value);
 }
 
@@ -202,15 +217,12 @@ void setResources(int n) {
 
    glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, diffuse[n]);
-   printf("%u\n", diffuse[n]);
 
    glActiveTexture(GL_TEXTURE1);
    glBindTexture(GL_TEXTURE_2D, normal[n]);
-   printf("%u\n", normal[n]);
    
    glActiveTexture(GL_TEXTURE2);
    glBindTexture(GL_TEXTURE_2D, specular[n]);
-   printf("%u\n", specular[n]);
 }
 
 void drawStuff() {
@@ -221,6 +233,9 @@ void drawStuff() {
    for(n = 0; n < renderCount; ++n) {
       obj* object = getObject(n);;
       setResources(n);
+      
+      unsigned int indexTangent = glGetAttribLocation(shaders[n], (const char*)"myTangent");
+      unsigned int indexBitangent = glGetAttribLocation(shaders[n], (const char*)"myBitangent");
 
       glBegin(GL_QUADS);
       for(i = 0; i < object->faceCount; ++i) {
@@ -231,6 +246,8 @@ void drawStuff() {
 
             glTexCoord2fv((GLfloat*)&object->textures[ti-1]);
             glNormal3fv((GLfloat*)&object->normals[ni-1]);
+            glVertexAttrib3fv(indexTangent, (GLfloat*)&object->tangents[vi - 1]);
+            glVertexAttrib3fv(indexBitangent, (GLfloat*)&object->bitangents[vi - 1]);
             glVertex3fv((GLfloat*)&object->vertices[vi-1]);
          }
       }

@@ -9,10 +9,15 @@ typedef struct vec3 {
    GLfloat x, y, z;
 } vec3;
 typedef int face[4][3];
-
+typedef struct tri {
+   int vIndices[3];
+   int tIndices[3];
+} tri; 
 typedef struct obj {
    int faceCount;
+   int vertexCount;
    face* faces;
+   int* shared;
    vec2* textures;
    vec3* vertices;
    vec3* normals;
