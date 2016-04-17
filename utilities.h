@@ -2,12 +2,18 @@
 #define UTILITIES
 #include <GL/gl.h>
 
-typedef GLfloat vec2[2];
-typedef GLfloat vec3[3];
-typedef int face[4][3];
+typedef struct vec2 {
+   GLfloat x, y;
+} vec2;
+typedef struct vec3 {
+   GLfloat x, y, z;
+} vec3;
+typedef int face[3][3];
 typedef struct obj {
    int faceCount;
+   int vertexCount;
    face* faces;
+   int* shared;
    vec2* textures;
    vec3* vertices;
    vec3* normals;
@@ -15,16 +21,20 @@ typedef struct obj {
    vec3* bitangents;
 } obj;
 
-void cpy(vec3 src, vec3 dest);
-void add(vec3 lhs, vec3 rhs, vec3 dest);
-void sub(vec3 lhs, vec3 rhs, vec3 dest);
-void sub2(vec2 lhs, vec2 rhs, vec2 dest);
-void mul(vec3 lhs, vec3 rhs, vec3 dest);
+vec3 addV3(vec3 lhs, vec3 rhs);
+vec3 subV3(vec3 lhs, vec3 rhs);
+vec3 mulV3(vec3 lhs, vec3 rhs);
+vec3 divV3(vec3 lhs, vec3 rhs);
+
+vec2 addV2(vec2 lhs, vec2 rhs);
+vec2 subV2(vec2 lhs, vec2 rhs);
+vec2 mulV2(vec2 lhs, vec2 rhs);
+vec2 divV2(vec2 lhs, vec2 rhs);
+
 float dot(vec3 lhs, vec3 rhs);
-float len(vec3 lhs);
-void scale(vec3 lhs, float factor, vec3 dest);
-void unit(vec3 lhs, vec3 dest);
-void crosss(vec3 lhs, vec3 rhs, vec3 dest);
+vec3 scale(vec3 src, float factor);
+vec3 cross(vec3 lhs, vec3 rhs);
+vec3 unit(vec3 src);
 
 void dieWithError(char* message);
 

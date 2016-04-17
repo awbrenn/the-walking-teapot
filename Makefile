@@ -1,12 +1,15 @@
 cc = clang
 objs = main.o utilities.o objParser.o
-flags = -L/usr/lib64 -lX11 -lGL -lGLU -lglut -lm
+flags = -g -L/usr/lib64 -lX11 -lGL -lGLU -lglut -lm
 
 all: $(objs)
-	$(cc) -g -o render $(objs) $(flags)
+	$(cc) -o render $(objs) $(flags)
 
-main.o : utilities.h objParser.h
-objParser.o: utilities.h
-
+main.o : main.c utilities.h objParser.h
+	$(cc) -c main.c $(flags)
+utilities.o: utilities.c utilities.h
+	$(cc) -c utilities.c $(flags)
+objParser.o: objParser.h objParser.c
+	$(cc) -c objParser.c $(flags)
 clean:
 	rm render $(objs)

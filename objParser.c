@@ -12,20 +12,19 @@ int prefix(const char* pre, const char* str) {
    return strncmp(pre, str, strlen(pre)) == 0;
 }
 
-void parseVec2(char* line, vec2* dest, int index) {
-   sscanf(line, "%*s %f %f", &dest[index][0], &dest[index][1]);
+void parseVec2(char* line, vec2* dest) {
+   sscanf(line, "%*s %f %f", &dest->x, &dest->y);
 }
 
-void parseVec3(char* line, vec3* dest, int index) {
-   sscanf(line, "%*s %f %f %f", &dest[index][0], &dest[index][1], &dest[index][2]);
+void parseVec3(char* line, vec3* dest) {
+   sscanf(line, "%*s %f %f %f", &dest->x, &dest->y, &dest->z);
 }
 
-void parseFace(char* line, face* dest, int index) {
-   sscanf(line, "%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",
-      &dest[index][0][0], &dest[index][0][1], &dest[index][0][2],
-      &dest[index][1][0], &dest[index][1][1], &dest[index][1][2],
-      &dest[index][2][0], &dest[index][2][1], &dest[index][2][2],
-      &dest[index][3][0], &dest[index][3][1], &dest[index][3][2]);
+void parseFace(char* line, face dest) {
+   sscanf(line, "%*s %d/%d/%d %d/%d/%d %d/%d/%d",
+      &dest[0][0], &dest[0][1], &dest[0][2],
+      &dest[1][0], &dest[1][1], &dest[1][2],
+      &dest[2][0], &dest[2][1], &dest[2][2]);
 }
 
 int nextIndex() {
@@ -34,57 +33,49 @@ int nextIndex() {
    return --index;
 }
 
-void uniqueMap(int vertexCount, int objectIndex) {
-   obj* object = objects[objectIndex];
-   int* tangentCount = (int*)calloc(vertexCount, sizeof(int));
-   int* bitangentCount = (int*)calloc(vertexCount, sizeof(int));
-
-   int i, j;
+void uniqueMap(obj* object) {
+   int i, j, k;
+   int vIndices[3], tIndices[3];
    for(i = 0; i < object->faceCount; ++i) {
-      vec3 tangent1, bitangent1;
-
-      vec3 pos1; cpy(object->vertices[object->faces[i][0][0]], pos1);
-      vec3 pos2; cpy(object->vertices[object->faces[i][0][1]], pos2);
-      vec3 pos3; cpy(object->vertices[object->faces[i][0][2]], pos3);
-
-      vec2 uv1; cpy(object->textures[object->faces[i][1][0]], uv1);
-      vec2 uv2; cpy(object->textures[object->faces[i][1][1]], uv2);
-      vec2 uv3; cpy(object->textures[object->faces[i][1][2]], uv3);
-
-      vec3 edge1; sub(pos2, pos1, edge1);
-      vec3 edge2; sub(pos3, pos1, edge2);
-      vec2 deltaUV1; sub(uv2, uv1, deltaUV1);
-      vec2 deltaUV2; sub(uv3, uv1, deltaUV2);
-
-      GLfloat f = 1.0f / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
-
-      tangent1[0] = f * (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]);
-      tangent1[1] = f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]);
-      tangent1[2] = f * (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2]);
-      unit(tangent1, tangent1);      
-
-      bitangent1[0] = f * (-deltaUV2[0] * edge1[0] + deltaUV1[0] * edge2[0]);
-      bitangent1[1] = f * (-deltaUV2[0] * edge1[1] + deltaUV1[0] * edge2[1]);
-      bitangent1[2] = f * (-deltaUV2[0] * edge1[2] + deltaUV1[0] * edge2[2]);
-      unit(bitangent1, bitangent1);
-
-      for(int i = 0; i < 3; ++i) {
-         add(object->tangents[object->faces[i][0][j]], tangent1, object->tangents[objects->faces[i][0][j]]); 
-         add(object->bitangents[object->faces[i][0][j]], bitangent1, object->tangents[objects->faces[i][0][j]]); 
-         ++tangentCount[object->faces[i][0][j]];
-         ++bitangentCount[object->faces[i][0][j]];
+      for(j = 0; j < 3; ++j) {
+         vIndices[j] = object->faces[i][j][0] - 1;
+         tIndices[j] = object->faces[i][j][1] - 1;
       }
+      
+      for(j = 0; j < 3; ++j) {
+         vec3 V[3];
+         vec2 T[3];
+         for(k = 0; k < 3; ++k) {
+            V[k] = object->vertices[vIndices[(j+k)%3]];
+            T[k] = object->textures[tIndices[(j+k)%3]];
+         }
+         vec3 edge1 = subV3(V[1], V[0]);
+         vec3 edge2 = subV3(V[2], V[0]);
+         vec2 deltaUV1 = subV2(T[1], T[0]);
+         vec2 deltaUV2 = subV2(T[2], T[0]);
+         GLfloat f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+         vec3 tangent;
+         tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+         tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+         tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+         tangent = unit(tangent);
+
+         vec3 bitangent;
+         bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+         bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+         bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+         bitangent = unit(bitangent);
+
+         object->tangents[vIndices[j]] = addV3(object->tangents[vIndices[j]], tangent);
+         object->bitangents[vIndices[j]] = addV3(object->bitangents[vIndices[j]], bitangent);
+      }
+
+      for(j = 0; j < 3; ++j) ++object->shared[vIndices[j]];
    }
-
-   for(i = 0; i < object->faceCount; ++i) {
-      for(j = 0; j < 4; ++j) {
-         scale(object->tangents[object->faces[i][0][j]],
-               1.0f / tangentCount[object->faces[i][0][j]],
-               object->tangents[object->faces[i][0][j]]);
-         scale(object->bitangents[object->faces[i][0][j]],
-               1.0f / bitangentCount[object->faces[i][0][j]],
-               object->bitangents[object->faces[i][0][j]]);
-      }
+   for(i = 0; i < object->vertexCount; ++i) {
+      object->tangents[i] = unit(scale(object->tangents[i], 1.0f / object->shared[i])); 
+      object->bitangents[i] = unit(scale(object->bitangents[i], 1.0f / object->shared[i])); 
    }
 }
 
@@ -104,7 +95,9 @@ int objLoad(char* filePath) {
 
    obj* object = (obj*)calloc(1, sizeof(obj));
    object->faceCount = faceCount;
-   object->vertices = (vec3*)calloc(vertexCount,sizeof(vec3));
+   object->vertexCount = vertexCount;
+   object->vertices = (vec3*)calloc(vertexCount, sizeof(vec3));
+   object->shared = (int*)calloc(vertexCount, sizeof(int));
    object->normals = (vec3*)calloc(normalCount, sizeof(vec3));
    object->tangents = (vec3*)calloc(vertexCount, sizeof(vec3));
    object->bitangents = (vec3*)calloc(vertexCount, sizeof(vec3));
@@ -114,11 +107,16 @@ int objLoad(char* filePath) {
    int vertexTally = 0, normalTally = 0, textureTally = 0, faceTally = 0;
 
    while(fgets(line, LINE_SIZE, file) != NULL) {
-      else if(prefix("vt", line)) parseVec2(line, object->textures, textureTally++);
-      else if(prefix("vn", line)) parseVec3(line, object->normals, normalTally++);
-      else if(prefix("v", line)) parseVec3(line, object->vertices, vertexTally++);
-      else if(prefix("f", line)) parseFace(line, object->faces, faceTally++);
+      if(prefix("vt", line)) {
+         parseVec2(line, &object->textures[textureTally]);
+         object->textures[textureTally].y = 1.0 - object->textures[textureTally].y;
+         ++textureTally;
+      }
+      else if(prefix("vn", line)) parseVec3(line, &object->normals[normalTally++]);
+      else if(prefix("v", line)) parseVec3(line, &object->vertices[vertexTally++]);
+      else if(prefix("f", line)) parseFace(line, object->faces[faceTally++]);
    }
+   uniqueMap(object);
 
    free(line);
    fclose(file);
@@ -129,9 +127,11 @@ int objLoad(char* filePath) {
 }
 
 void objUnload() {
-   for(int i = 0; i < 256; ++i) {
+    int i;
+    for(i = 0; i < 256; ++i) {
       if(!objects[i]) continue;
       free(objects[i]->vertices);
+      free(objects[i]->shared);
       free(objects[i]->normals);
       free(objects[i]->textures);
       free(objects[i]->bitangents);
