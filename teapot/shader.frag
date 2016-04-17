@@ -22,9 +22,9 @@ void light_geometry(int light_index, float influence, vec3 light_color) {
   N = normalize(tform*normalize(mapN));
 
   tcolor = vec3(texture2D(myDiffuse, gl_TexCoord[0].st));
-  diffuse_color = vec4(tcolor, 1.0)*max(dot(N,L), 0.0);   
+  diffuse_color = vec4(tcolor * light_color, 1.0)*max(dot(N,L), 0.0);
 
-  scolor = vec3(0.807, 0.678, 0.620) * vec3(texture2D(mySpecular, gl_TexCoord[0].st));
+  scolor = light_color * vec3(texture2D(mySpecular, gl_TexCoord[0].st));
   specular_color = vec4(scolor, 1.0)*pow(max(dot(H,N), 0.0), shininess);
   specular_color *= (shininess+2.0)/(8.0*pi);
 
@@ -37,5 +37,5 @@ void light_geometry(int light_index, float influence, vec3 light_color) {
 void main() {
   //light_geometry(0, 1.0, vec3(1.0, 1.0, 1.0));
   light_geometry(1, 0.4, vec3(1.0, 1.0, 1.0));
-  light_geometry(2, 1.3, vec3(1.0, 1.0, 1.0));
+  light_geometry(2, 1.3, vec3(0.807, 0.678, 0.620));
 }
