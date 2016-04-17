@@ -72,6 +72,14 @@ glLightfv(GL_LIGHT0,GL_POSITION,light0_position);
 glLightfv(GL_LIGHT0,GL_SPOT_DIRECTION,light0_direction);
 glEnable(GL_LIGHTING);
 glEnable(GL_LIGHT0);
+
+float fill_position[] = { 3.5, -1.0, 1.5, 1.0 };
+glLightfv(GL_LIGHT1,GL_POSITION,fill_position);
+glEnable(GL_LIGHT1);
+
+float rim_position[] = { -18.5, 25.0, -26.0, 1.0 };
+glLightfv(GL_LIGHT2,GL_POSITION,rim_position);
+glEnable(GL_LIGHT1);
 }
 
 void loadTexture(char *folder, int type) {
